@@ -3,5 +3,11 @@ name = "mittens"
 version = "0.0.0"
 authors = ["Erik Price"]
 
+[[executable]]
+name = "mittens"
+
+[[executable]]
+name = "mittensc"
+
 [dependencies.knuckle]
 git = "https://github.com/erik/knuckle"
