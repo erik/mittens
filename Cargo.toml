@@ -1,0 +1,7 @@
+[package]
+name = "mittens"
+version = "0.0.0"
+authors = ["Erik Price"]
+
+[dependencies.knuckle]
+git = "https://github.com/erik/knuckle"
