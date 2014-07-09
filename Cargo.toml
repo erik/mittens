@@ -1,13 +1,11 @@
-[package]
+[project]
 name = "mittens"
 version = "0.0.0"
 authors = ["Erik Price"]
 
-[[executable]]
+[[bin]]
 name = "mittens"
-
-[[executable]]
-name = "mittensc"
+path = "src/mittens.rs"
 
 [dependencies.knuckle]
 git = "https://github.com/erik/knuckle"
