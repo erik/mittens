@@ -4,6 +4,7 @@ use std::io::{IoError, IoResult, Reader, TcpStream};
 
 static VERSION_NUMBER: u8 = 0x05;
 static AUTH_NONE: u8 = 0x00;
+static CONNECT_CMD: u8 = 0x01;
 
 struct SocksConnection<'a> {
     stream: &'a mut TcpStream
@@ -42,7 +43,7 @@ impl <'a> SocksConnection<'a> {
         // If the client doesn't respond to NULL-auth, we can't proceed.
         if !methods.contains(&AUTH_NONE) {
             // Send the error back
-            try!(self.stream.write(&[VERSION_NUMER, 0xFF]));
+            try!(self.stream.write(&[VERSION_NUMBER, 0xFF]));
 
             return Err(IoError::last_error());
         }
@@ -72,10 +73,45 @@ impl <'a> SocksConnection<'a> {
     /// o  DST.ADDR desired destination address
     /// o  DST.PORT desired destination port in network octet
     ///    order
+    ///
+    /// Client <- Server:
+    /// +----+-----+-------+------+----------+----------+
+    /// |VER | REP |  RSV  | ATYP | BND.ADDR | BND.PORT |
+    /// +----+-----+-------+------+----------+----------+
+    /// | 1  |  1  | X'00' |  1   | Variable |    2     |
+    ///
+    ///   o  VER    protocol version: X'05'
+    ///   o  REP    Reply field:
+    ///      o  X'00' succeeded
+    ///      o  X'01' general SOCKS server failure
+    ///      o  X'02' connection not allowed by ruleset
+    ///      o  X'03' Network unreachable
+    ///      o  X'04' Host unreachable
+    ///      o  X'05' Connection refused
+    ///      o  X'06' TTL expired
+    ///      o  X'07' Command not supported
+    ///      o  X'08' Address type not supported
+    ///      o  X'09' to X'FF' unassigned
+    ///   o  RSV    RESERVED
+    ///   o  ATYP   address type of following address
+    ///
+    ///      o  IP V4 address: X'01'
+    ///      o  DOMAINNAME: X'03'
+    ///      o  IP V6 address: X'04'
+    ///   o  BND.ADDR       server bound address
+    ///   o  BND.PORT       server bound port in network octet order
     fn do_client_request(&mut self) -> IoResult<()> {
         try!(self.do_client_version());
 
-        let cmd = try!(self.stream.read_byte());
+        // Commands (for now only connect is supported)
+        match try!(self.stream.read_byte()) {
+            CONNECT_CMD => (),
+            _ => {
+                // Tell client we don't support that command
+                try!(self.stream.write(&[VERSION_NUMBER, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00]));
+                return Err(IoError::last_error());
+            }
+        };
 
         // Reserved byte
         match try!(self.stream.read_byte()) {
