@@ -7,4 +7,5 @@ pub use mittens::server;
 mod mittens {
     pub mod client;
     pub mod server;
+    pub mod socks;
 }
