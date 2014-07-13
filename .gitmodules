@@ -1,3 +1,0 @@
-[submodule "libs/knuckle"]
-	path = libs/knuckle
-	url = git://github.com/erik/knuckle.git
