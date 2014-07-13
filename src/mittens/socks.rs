@@ -2,7 +2,7 @@
 
 use std::str;
 use std::io::{IoError, IoResult, Reader, TcpStream};
-use std::io::net::ip::{Ipv4Addr, Ipv6Addr};
+use std::io::net::ip::{Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::io::net::addrinfo;
 
 #[allow(dead_code)]
@@ -99,7 +99,7 @@ impl <'a> SocksConnection<'a> {
     /// o  DST.ADDR desired destination address
     /// o  DST.PORT desired destination port in network octet
     ///    order
-    fn read_client_request(&mut self) -> IoResult<()> {
+    fn read_client_request(&mut self) -> IoResult<TcpStream> {
         try!(self.read_client_version());
 
         // Commands (for now only connect is supported)
@@ -119,7 +119,7 @@ impl <'a> SocksConnection<'a> {
         };
 
         // Address type
-        let _ = match try!(self.stream.read_byte()) {
+        let addr = match try!(self.stream.read_byte()) {
             // 4 bytes
             consts::atype::IPV4 => {
                 let a = try!(self.stream.read_byte());
@@ -168,9 +168,11 @@ impl <'a> SocksConnection<'a> {
         };
 
         // Network port
-        let _ = try!(self.stream.read_be_u16());
+        let port = try!(self.stream.read_be_u16());
 
-        Ok(())
+        Ok(try!(TcpStream::connect_timeout(
+            SocketAddr { ip: addr, port: port },
+            1000)))
     }
 
     /// Client <- Server:
@@ -205,5 +207,8 @@ pub fn handle_stream<'a>(stream: &'a mut TcpStream) -> () {
         return;
     }
 
-    conn.read_client_request();
+    match conn.read_client_request() {
+        Ok(mut stream) => (),
+        Err(_) => ()
+    }
 }
