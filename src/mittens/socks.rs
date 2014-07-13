@@ -45,7 +45,7 @@ struct SocksConnection<'a> {
 impl <'a> SocksConnection<'a> {
     /// Make sure that the client sends the right version number at
     /// the start of the message, or fail
-    fn do_client_version(&mut self) -> IoResult<()> {
+    fn read_client_version(&mut self) -> IoResult<()> {
         match try!(self.stream.read_byte()) {
             consts::VERSION_NUMBER => Ok(()),
             _ => Err(IoError::last_error())
@@ -63,8 +63,8 @@ impl <'a> SocksConnection<'a> {
     /// |VER | METHOD |
     /// +----+--------+
     /// | 1  |   1    |
-    fn do_client_hello(&mut self) -> IoResult<()> {
-        try!(self.do_client_version());
+    fn read_client_hello(&mut self) -> IoResult<()> {
+        try!(self.read_client_version());
 
         // Number of authentication methods
         let nmethods = try!(self.stream.read_byte());
@@ -99,8 +99,8 @@ impl <'a> SocksConnection<'a> {
     /// o  DST.ADDR desired destination address
     /// o  DST.PORT desired destination port in network octet
     ///    order
-    fn do_client_request(&mut self) -> IoResult<()> {
-        try!(self.do_client_version());
+    fn read_client_request(&mut self) -> IoResult<()> {
+        try!(self.read_client_version());
 
         // Commands (for now only connect is supported)
         match try!(self.stream.read_byte()) {
@@ -201,9 +201,9 @@ impl <'a> SocksConnection<'a> {
 pub fn handle_stream<'a>(stream: &'a mut TcpStream) -> () {
     let mut conn = SocksConnection { stream: stream };
 
-    if conn.do_client_hello().is_err() {
+    if conn.read_client_hello().is_err() {
         return;
     }
 
-    conn.do_client_request();
+    conn.read_client_request();
 }
