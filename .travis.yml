@@ -1,8 +1,5 @@
 install:
-  - curl --retry 3 --output rust.tgz
-    http://static.rust-lang.org/dist/rust-nightly-x86_64-unknown-linux-gnu.tar.gz
-  - tar xf rust.tgz
-  - (cd ./rust-nightly-x86_64-unknown-linux-gnu/; sudo ./install.sh)
+  - curl -s http://www.rust-lang.org/rustup.sh | sudo sh - 
   - export LD_LIBRARY_PATH=/usr/local/lib
 script:
   - cargo build
