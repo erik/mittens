@@ -1,3 +1,4 @@
-pub mod client;
+pub mod config;
+pub mod relay;
 pub mod server;
 pub mod socks;
