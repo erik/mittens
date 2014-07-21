@@ -10,7 +10,7 @@ that can be deployed to any server.
 
 ## Building
 
-You'll need to grab [cargo](crates.io) to build and test mittens. After that,
+You'll need to grab [cargo](http://crates.io) to build and test mittens. After that,
 building the application is as simple as:
 
 ```bash
