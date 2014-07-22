@@ -19,5 +19,5 @@ pub struct RelayConfig {
     /// Remote host / port
     pub server_addr: SocketAddr,
     /// Asserted public key for remote server handshake
-    pub server_pubkey: PublicKey
+    pub verify_key: PublicKey
 }

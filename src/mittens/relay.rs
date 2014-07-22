@@ -1,45 +1,41 @@
-extern crate serialize;
-use self::serialize::base64::{ToBase64, STANDARD};
+use std::io::{IoError, TcpListener, Listener, Acceptor, TcpStream, IoResult};
 
-use std::io::{BufferedStream, IoError, TcpListener, Listener, Acceptor, TcpStream, IoResult};
-
-use knuckle::sign::{SignedMsg, PublicKey};
+use knuckle::{cryptobox, sign};
 use knuckle::util::random_bytes;
+use knuckle::cryptobox::{CryptoBox, Keypair};
 
 use mittens::socks;
 use mittens::config::RelayConfig;
 
 struct ServerConnection {
-    server_pubkey: PublicKey,
-    control: BufferedStream<TcpStream>
+    verify_key: sign::PublicKey,
+    cbox: cryptobox::CryptoBox,
+    control: TcpStream
 }
 
 impl ServerConnection {
     fn new(conf: &RelayConfig) -> IoResult<ServerConnection> {
         let control = try!(TcpStream::connect_timeout(conf.server_addr, 5000));
-        let mut buffered = BufferedStream::new(control);
 
-        try!(ServerConnection::verify_stream(conf.server_pubkey, &mut buffered));
+        // TODO: REMOVE ME
+        let key = Keypair::new();
 
         Ok(ServerConnection {
-            server_pubkey: conf.server_pubkey,
-            control: buffered
+            verify_key: conf.verify_key,
+            cbox: CryptoBox::from_key_pair(key.sk, key.pk),
+            control: control
         })
     }
 
     /// Challenge the server with a random nonce, ensure that they can
     /// produce a valid signature.
-    fn verify_stream(key: PublicKey, stream: &mut BufferedStream<TcpStream>) -> IoResult<()> {
-        // Generate bytes and base64 encode
+    fn verify_stream(&mut self) -> IoResult<()> {
         let nonce = random_bytes(128);
-        let nonce_b64 = nonce.as_slice().to_base64(STANDARD);
+        let resp = try!(self.send(nonce.as_slice()));
 
-        try!(stream.write_line(nonce_b64.as_slice()));
-        let resp = try!(stream.read_line());
-
-        let smsg = SignedMsg {
-            pk: key,
-            signed: Vec::from_slice(resp.as_bytes())
+        let smsg = sign::SignedMsg {
+            pk: self.verify_key,
+            signed: resp
         };
 
         match smsg.verify() {
@@ -47,14 +43,31 @@ impl ServerConnection {
             _ => Err(IoError::last_error())
         }
     }
+
+    fn establish_connection(&mut self) -> IoResult<()> {
+        try!(self.verify_stream());
+
+        Ok(())
+    }
+
+    fn send(&mut self, msg: &[u8]) -> IoResult<Vec<u8>> {
+        let ciphertext = self.cbox.encrypt(msg).as_bytes();
+
+        try!(self.control.write_be_uint(ciphertext.len()));
+        try!(self.control.write(ciphertext.as_slice()));
+
+        let len = try!(self.control.read_be_uint());
+        self.control.read_exact(len)
+    }
 }
 
 
 pub fn start_relay(conf: RelayConfig) {
-    let server_conn = match ServerConnection::new(&conf) {
-        Ok(conn) => conn,
-        Err(x) => fail!("Failed to establish secure connection: {}", x)
-    };
+    let server_conn = match ServerConnection::new(&conf)
+        .and_then(|mut c| c.verify_stream()) {
+            Ok(conn) => conn,
+            Err(x) => fail!("Failed to establish secure connection: {}", x)
+        };
 
     let listener = TcpListener::bind(conf.relay_host.as_slice(),
                                      conf.relay_port);
