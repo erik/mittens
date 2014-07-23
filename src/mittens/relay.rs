@@ -53,8 +53,12 @@ impl ServerConnection {
     fn send(&mut self, msg: &[u8]) -> IoResult<Vec<u8>> {
         let ciphertext = self.cbox.encrypt(msg).as_bytes();
 
-        try!(self.control.write_be_uint(ciphertext.len()));
-        try!(self.control.write(ciphertext.as_slice()));
+        self.send_raw(ciphertext.as_slice())
+    }
+
+    fn send_raw(&mut self, msg: &[u8]) -> IoResult<Vec<u8>> {
+        try!(self.control.write_be_uint(msg.len()));
+        try!(self.control.write(msg.as_slice()));
 
         let len = try!(self.control.read_be_uint());
         self.control.read_exact(len)
