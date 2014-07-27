@@ -155,7 +155,7 @@ impl <'a> SocksConnection<'a> {
                     None => { return Err(IoError::last_error()); }
                 };
 
-                match hosts.shift() {
+                match hosts.remove(0) {
                     Some(host) => host,
                     None => { return Err(IoError::last_error()); }
                 }
