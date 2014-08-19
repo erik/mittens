@@ -30,11 +30,6 @@ Each message exchanged between the `server` and the `relay` is prefixed with a
 The Relay is expected to obtain a copy of the server's cryptographic signature
 public key and asymmetric encryption public key out of band.
 
-- Sequence Legend
-    * `<plain text>`
-    * `[signed text]`
-    * `{signed,encrypted text}`
-
 ### Sequence
 
 ### Handshake

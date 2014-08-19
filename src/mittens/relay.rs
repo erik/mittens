@@ -29,7 +29,7 @@ impl ServerConnection {
 
     /// Challenge the server with a random nonce, ensure that they can
     /// produce a valid signature.
-    fn verify_stream(&mut self) -> IoResult<()> {
+    fn stream_handshake(&mut self) -> IoResult<()> {
         let nonce = random_bytes(128);
         let resp = try!(self.send(nonce.as_slice()));
 
@@ -44,15 +44,22 @@ impl ServerConnection {
         }
     }
 
+    fn rotate_key(&mut self) -> IoResult<()> {
+        let key = random_bytes(32);
+        try!(self.send(key.as_slice()));
+
+        Ok(())
+    }
+
     fn establish_connection(&mut self) -> IoResult<()> {
-        try!(self.verify_stream());
+        try!(self.stream_handshake());
+        try!(self.rotate_key());
 
         Ok(())
     }
 
     fn send(&mut self, msg: &[u8]) -> IoResult<Vec<u8>> {
         let ciphertext = self.cbox.encrypt(msg).as_bytes();
-
         self.send_raw(ciphertext.as_slice())
     }
 
@@ -68,7 +75,7 @@ impl ServerConnection {
 
 pub fn start_relay(conf: RelayConfig) {
     let server_conn = match ServerConnection::new(&conf)
-        .and_then(|mut c| c.verify_stream()) {
+        .and_then(|mut c| c.establish_connection()) {
             Ok(conn) => conn,
             Err(x) => fail!("Failed to establish secure connection: {}", x)
         };
