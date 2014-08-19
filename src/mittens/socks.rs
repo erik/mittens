@@ -5,6 +5,7 @@ use std::io::{IoError, IoResult, Reader, TcpStream};
 use std::io::net::ip::{Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::io::net::addrinfo;
 use std::str;
+use std::time::duration::Duration;
 
 #[allow(dead_code)]
 mod consts {
@@ -173,7 +174,7 @@ impl <'a> SocksConnection<'a> {
 
         Ok(try!(TcpStream::connect_timeout(
             SocketAddr { ip: addr, port: port },
-            1000)))
+            Duration::seconds(1000))))
     }
 
     /// Client <- Server:
@@ -257,5 +258,5 @@ pub fn handle_stream<'a>(client_stream: &'a mut TcpStream) -> () {
             }
         },
         Err(_) => ()
-    }
 }
+    }

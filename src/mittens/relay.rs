@@ -1,4 +1,5 @@
 use std::io::{IoError, TcpListener, Listener, Acceptor, TcpStream, IoResult};
+use std::time::duration::Duration;
 
 use knuckle::{cryptobox, sign};
 use knuckle::util::random_bytes;
@@ -15,7 +16,8 @@ struct ServerConnection {
 
 impl ServerConnection {
     fn new(conf: &RelayConfig) -> IoResult<ServerConnection> {
-        let control = try!(TcpStream::connect_timeout(conf.server_addr, 5000));
+        let control = try!(TcpStream::connect_timeout(conf.server_addr,
+                                                      Duration::seconds(5000)));
 
         // TODO: REMOVE ME
         let key = Keypair::new();
