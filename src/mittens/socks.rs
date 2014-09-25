@@ -210,53 +210,54 @@ pub fn handle_stream<'a>(client_stream: &'a mut TcpStream) -> () {
     }
 
     // FIXME: A ton of probably redundant clone()s here.
-    match conn.read_client_request() {
-        Ok(server_stream) => {
-            let (client_send, client_recv) = channel();
-            let (server_send, server_recv) = channel();
+    // FIXME: This causes an ICE:
+    // match conn.read_client_request() {
+    //     Ok(server_stream) => {
+    //         let (client_send, client_recv) = channel();
+    //         let (server_send, server_recv) = channel();
 
-            let client = conn.stream.clone();
-            let server = server_stream.clone();
+    //         let client = conn.stream.clone();
+    //         let server = server_stream.clone();
 
-            // client -> server
-            spawn(proc() {
-                let mut client = client.clone();
-                loop {
-                    let mut buf = [0u8, ..4096];
-                    match client.read(buf) {
-                        Ok(_) => client_send.send(buf),
-                        Err(_) => break
-                    }
-                }
-            });
+    //         // client -> server
+    //         spawn(proc() {
+    //             let mut client = client.clone();
+    //             loop {
+    //                 let mut buf = [0u8, ..4096];
+    //                 match client.read(buf) {
+    //                     Ok(_) => client_send.send(buf),
+    //                     Err(_) => break
+    //                 }
+    //             }
+    //         });
 
-            // client <- server
-            spawn(proc() {
-                let mut server = server.clone();
-                loop {
-                    let mut buf = [0u8, ..4096];
-                    match server.read(buf) {
-                        Ok(_) => server_send.send(buf),
-                        Err(_) => break
-                    }
-                }
-            });
+    //         // client <- server
+    //         spawn(proc() {
+    //             let mut server = server.clone();
+    //             loop {
+    //                 let mut buf = [0u8, ..4096];
+    //                 match server.read(buf) {
+    //                     Ok(_) => server_send.send(buf),
+    //                     Err(_) => break
+    //                 }
+    //             }
+    //         });
 
-            loop {
-                let mut client = conn.stream.clone();
-                let mut server = server_stream.clone();
+    //         loop {
+    //             let mut client = conn.stream.clone();
+    //             let mut server = server_stream.clone();
 
-                let result = select! {
-                    buf = client_recv.recv() => server.write(buf),
-                    buf = server_recv.recv() => client.write(buf)
-                };
+    //             let result = select! {
+    //                 buf = client_recv.recv() => server.write(buf),
+    //                 buf = server_recv.recv() => client.write(buf)
+    //             };
 
-                match result {
-                    Err(e) => println!("Something broke: {}", e),
-                    _ => ()
-                }
-            }
-        },
-        Err(_) => ()
+    //             match result {
+    //                 Err(e) => println!("Something broke: {}", e),
+    //                 _ => ()
+    //             }
+    //         }
+    //     },
+    //     Err(_) => ()
+    // }
 }
-    }
