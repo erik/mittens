@@ -9,34 +9,34 @@ use std::time::duration::Duration;
 
 #[allow(dead_code)]
 mod consts {
-    pub static VERSION_NUMBER: u8 = 0x05;
+    pub const VERSION_NUMBER: u8 = 0x05;
 
     pub mod auth {
-        pub static NONE: u8 = 0x00;
+        pub const NONE: u8 = 0x00;
     }
 
     pub mod atype {
-        pub static IPV4:   u8 = 0x1;
-        pub static IPV6:   u8 = 0x4;
-        pub static DOMAIN: u8 = 0x3;
+        pub const IPV4:   u8 = 0x1;
+        pub const IPV6:   u8 = 0x4;
+        pub const DOMAIN: u8 = 0x3;
     }
 
     pub mod command {
-        pub static CONNECT:       u8 = 0x01;
-        pub static BIND:          u8 = 0x02;
-        pub static UDP_ASSOCIATE: u8 = 0x04;
+        pub const CONNECT:       u8 = 0x01;
+        pub const BIND:          u8 = 0x02;
+        pub const UDP_ASSOCIATE: u8 = 0x04;
     }
 
     pub mod reply {
-        pub static SUCCESS:          u8 = 0x00;
-        pub static GENERAL_FAILURE:  u8 = 0x01;
-        pub static CONN_DENIED:      u8 = 0x02;
-        pub static NET_UNREACHABLE:  u8 = 0x03;
-        pub static HOST_UNREACHABLE: u8 = 0x04;
-        pub static CONN_REFUSED:     u8 = 0x05;
-        pub static TTL_EXPIRED:      u8 = 0x06;
-        pub static CMD_UNSUPPORTED:  u8 = 0x07;
-        pub static ADDR_UNSUPPORTED: u8 = 0x08;
+        pub const SUCCESS:          u8 = 0x00;
+        pub const GENERAL_FAILURE:  u8 = 0x01;
+        pub const CONN_DENIED:      u8 = 0x02;
+        pub const NET_UNREACHABLE:  u8 = 0x03;
+        pub const HOST_UNREACHABLE: u8 = 0x04;
+        pub const CONN_REFUSED:     u8 = 0x05;
+        pub const TTL_EXPIRED:      u8 = 0x06;
+        pub const CMD_UNSUPPORTED:  u8 = 0x07;
+        pub const ADDR_UNSUPPORTED: u8 = 0x08;
     }
 }
 
