@@ -79,11 +79,11 @@ pub fn start_relay(conf: RelayConfig) {
     let _ = match ServerConnection::new(&conf)
         .and_then(|mut c| c.establish_connection()) {
             Ok(conn) => conn,
-            Err(x) => fail!("Failed to establish secure connection: {}", x)
+            Err(x) => panic!("Failed to establish secure connection: {}", x)
         };
 
-    let listener = TcpListener::bind(conf.relay_host.as_slice(),
-                                     conf.relay_port);
+    let listener = TcpListener::bind((conf.relay_host.as_slice(),
+                                      conf.relay_port));
     let mut acceptor = listener.listen().unwrap();
 
     for stream in acceptor.incoming() {
