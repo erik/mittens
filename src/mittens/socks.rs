@@ -150,10 +150,8 @@ impl <'a> SocksConnection<'a> {
                 let len = try!(self.stream.read_byte());
                 let hostname = try!(self.stream.read_exact(len as uint));
 
-                let mut hosts = match str::from_utf8(hostname.as_slice()) {
-                    Some(host) => try!(addrinfo::get_host_addresses(host)),
-                    None => { return Err(IoError::last_error()); }
-                };
+                let host_str = str::from_utf8(hostname.as_slice()).unwrap();
+                let mut hosts = try!(addrinfo::get_host_addresses(host_str));
 
                 match hosts.remove(0) {
                     Some(host) => host,
