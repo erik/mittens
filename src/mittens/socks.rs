@@ -153,10 +153,7 @@ impl <'a> SocksConnection<'a> {
                 let host_str = str::from_utf8(hostname.as_slice()).unwrap();
                 let mut hosts = try!(addrinfo::get_host_addresses(host_str));
 
-                match hosts.remove(0) {
-                    Some(host) => host,
-                    None => { return Err(IoError::last_error()); }
-                }
+                hosts.remove(0)
             },
 
             // Unsupported address type
