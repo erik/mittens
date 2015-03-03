@@ -1,4 +1,4 @@
-use std::io::{IoError, TcpListener, Listener, Acceptor, TcpStream, IoResult};
+use std::old_io::{IoError, TcpListener, Listener, Acceptor, TcpStream, IoResult};
 use std::time::duration::Duration;
 
 use knuckle::{cryptobox, sign};

@@ -1,6 +1,6 @@
 use knuckle::sign::{Keypair, PublicKey};
 
-use std::io::net::ip::SocketAddr;
+use std::old_io::net::ip::SocketAddr;
 
 pub struct Config {
     server: ServerConfig,

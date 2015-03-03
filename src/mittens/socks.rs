@@ -1,8 +1,8 @@
 //! SOCKSv5 protocol support
 
-use std::io::{IoError, IoResult, Reader, TcpStream};
-use std::io::net::ip::{Ipv4Addr, Ipv6Addr, SocketAddr};
-use std::io::net::addrinfo;
+use std::old_io::{IoError, IoResult, Reader, TcpStream};
+use std::old_io::net::ip::{Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::old_io::net::addrinfo;
 use std::str;
 use std::time::duration::Duration;
 

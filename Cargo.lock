@@ -8,5 +8,5 @@ dependencies = [
 [[package]]
 name = "knuckle"
 version = "0.1.0"
-source = "git+https://github.com/erik/knuckle#a53b6614c49d73546af646fffd93f907201faf06"
+source = "git+https://github.com/erik/knuckle#aa2b1d1a5a37d8d4972017524bfa4cfc54353ce6"
 
